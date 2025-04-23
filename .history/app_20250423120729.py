@@ -12,7 +12,7 @@ from database.operations import (
 )
 
 
-load_dotenv(os.path.join(os.path.dirname(__file__), 'x.env'))
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 
 
@@ -22,7 +22,7 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 WATERMARK = "🚨 FAKE CONTENT ! DO NOT TRUST 🚨"
 
 
-def safe_parse_json(text: str)x
+def safe_parse_json(text: str):
     """
     1. Strip Markdown fences and comment lines
     2. Locate the first '['

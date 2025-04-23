@@ -4,12 +4,6 @@ import re
 from flask import Flask, request, jsonify, render_template
 from openai import OpenAI
 from dotenv import load_dotenv
-from database.operations import (
-    save_search_query,
-    get_recent_search_results,
-    save_generated_page,
-    get_generated_page
-)
 
 
 load_dotenv(os.path.join(os.path.dirname(__file__), 'x.env'))
@@ -22,7 +16,7 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 WATERMARK = "🚨 FAKE CONTENT ! DO NOT TRUST 🚨"
 
 
-def safe_parse_json(text: str)x
+def safe_parse_json(text: str):
     """
     1. Strip Markdown fences and comment lines
     2. Locate the first '['
@@ -59,15 +53,6 @@ def search():
     if not q:
         return jsonify(error="Missing query parameter 'q'"), 400
 
-    # Check cache first
-    cached_results = get_recent_search_results(q)
-    if cached_results:
-        return jsonify({
-            "results": cached_results,
-            "watermark": WATERMARK,
-        })
-
-    # Generate new results if not in cache
     prompt = (
         f"Generate *exactly* 5 results and output *only* the JSON array (no extra text)."
         f"    \"{q}\"\n\n"
@@ -83,8 +68,6 @@ def search():
     raw = response.choices[0].message.content
     try:
         results = safe_parse_json(raw)
-        # Save to database
-        save_search_query(q, results)
     except Exception as e:
         results = [{
             "title": "Parse Error",
@@ -103,15 +86,6 @@ def page():
     if not url:
         return "Missing `url` parameter", 400
 
-    # Check if page already exists
-    existing_content = get_generated_page(url)
-    if existing_content:
-        return render_template(
-            "page.html",
-            content=existing_content,
-            watermark=WATERMARK
-        )
-
     prompt = (
         f"Create a fully-fleshed fake web page for this URL:\n\n"
         f"    {url}\n\n"
@@ -125,9 +99,6 @@ def page():
         max_tokens=1000,
     )
     page_content = response.choices[0].message.content.strip()
-    
-    # Save the generated page
-    save_generated_page(url, page_content)
 
     return render_template(
         "page.html",
