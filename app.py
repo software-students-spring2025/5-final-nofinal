@@ -1,3 +1,5 @@
+"""Giigle web app – a fake AI-powered search engine using Flask and OpenAI."""
+
 import os
 import json
 import re
@@ -36,16 +38,19 @@ def safe_parse_json(text: str):
 
 @app.route("/search", methods=["GET"])
 def search():
-    q = request.args.get("q", "").strip()
-    if not q:
+    """Handle search queries by generating fake search results using GPT."""
+    query = request.args.get("q", "").strip()
+    if not query:
         return jsonify(error="Missing query parameter 'q'"), 400
 
     prompt = (
-        f"Generate *exactly* 5 results and output *only* the JSON array (no extra text)."
-        f"    \"{q}\"\n\n"
+        "Generate *exactly* 5 results "
+        "and output *only* the JSON array (no extra text). \"{query}\"\n\n"
         "Respond with *only* a JSON array (no Markdown fences, no comments),\n"
-        "where each element has keys: title (string), snippet (string), url (string). Under 500 tokens"
+        "where each element has keys: "
+        "title (string), snippet (string), url (string). Under 500 tokens"
     )
+
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "user", "content": prompt}],
@@ -54,7 +59,7 @@ def search():
     raw = response.choices[0].message.content
     try:
         results = safe_parse_json(raw)
-    except Exception:
+    except ValueError:
         results = [{
             "title": "Parse Error",
             "snippet": raw.strip(),
@@ -68,6 +73,7 @@ def search():
 
 @app.route("/api/page", methods=["GET"])
 def page_api():
+    """Return fake HTML content based on a URL string using OpenAI."""
     url = request.args.get("url", "").strip()
     if not url:
         return jsonify(error="Missing `url` parameter"), 400
@@ -93,6 +99,7 @@ def page_api():
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve_react(path):
+    """Serve static React build files from the frontend directory."""
     build_dir = os.path.join(os.path.dirname(__file__), "frontend", "build")
     if path and os.path.exists(os.path.join(build_dir, path)):
         return send_from_directory(build_dir, path)
