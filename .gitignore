@@ -147,6 +147,9 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# history
+.history/
 x.env
 =======
 frontend/node_modules/

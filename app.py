@@ -4,12 +4,20 @@ import os
 import json
 import re
 from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
 from openai import OpenAI
 from dotenv import load_dotenv
+from database.operations import (
+    save_search_query,
+    get_recent_search_results,
+    save_generated_page,
+    get_generated_page
+)
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "x.env"))
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='frontend/build', static_url_path='')
+CORS(app)  # Enable CORS for all routes
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 WATERMARK = "🚨 FAKE CONTENT ! DO NOT TRUST 🚨"
 
@@ -38,16 +46,25 @@ def safe_parse_json(text: str):
     return json.loads(json_str)
 
 
-@app.route("/search", methods=["GET"])
+@app.route("/api/search", methods=["GET"])
 def search():
     """Handle search queries by generating fake search results using GPT."""
     query = request.args.get("q", "").strip()
     if not query:
         return jsonify(error="Missing query parameter 'q'"), 400
 
+    # Check cache first
+    cached_results = get_recent_search_results(query)
+    if cached_results:
+        return jsonify({
+            "results": cached_results,
+            "watermark": WATERMARK,
+        })
+
+    # Generate new results if not in cache
     prompt = (
-        "Generate *exactly* 5 results "
-        'and output *only* the JSON array (no extra text). "{query}"\n\n'
+        f"Generate *exactly* 5 results "
+        f'and output *only* the JSON array (no extra text). "{query}"\n\n'
         "Respond with *only* a JSON array (no Markdown fences, no comments),\n"
         "where each element has keys: "
         "title (string), snippet (string), url (string). Under 500 tokens"
@@ -61,8 +78,14 @@ def search():
     raw = response.choices[0].message.content
     try:
         results = safe_parse_json(raw)
-    except ValueError:
-        results = [{"title": "Parse Error", "snippet": raw.strip(), "url": "#"}]
+        # Save to database
+        save_search_query(query, results)
+    except Exception as e:
+        results = [{
+            "title": "Parse Error",
+            "snippet": raw.strip(),
+            "url": "#"
+        }]
 
     return jsonify(
         {
@@ -79,32 +102,44 @@ def page_api():
     if not url:
         return jsonify(error="Missing `url` parameter"), 400
 
+    # Check if page already exists
+    existing_content = get_generated_page(url)
+    if existing_content:
+        return jsonify({
+            "content": existing_content,
+            "watermark": WATERMARK
+        })
+
     prompt = (
         f"Generate a complete HTML page for this URL: {url}\n"
         "- Use <h1> for the title\n"
         "- Wrap each paragraph in <p>\n"
-        "- Include a fixed-position watermark banner at the top right\n"
         "- Do NOT output any Markdown fences or code blocks, only raw HTML\n"
     )
 
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-4",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=1000,
     )
-    # The model will now return pure HTML
-    page_html = response.choices[0].message.content.strip()
-    return jsonify({"html": page_html})
+    page_content = response.choices[0].message.content.strip()
+    
+    # Save the generated page to database
+    save_generated_page(url, page_content)
+
+    return jsonify({
+        "content": page_content,
+        "watermark": WATERMARK
+    })
 
 
-@app.route("/", defaults={"path": ""})
-@app.route("/<path:path>")
-def serve_react(path):
-    """Serve static React build files from the frontend directory."""
-    build_dir = os.path.join(os.path.dirname(__file__), "frontend", "build")
-    if path and os.path.exists(os.path.join(build_dir, path)):
-        return send_from_directory(build_dir, path)
-    return send_from_directory(build_dir, "index.html")
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(app.static_folder + '/' + path):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
 
 
 if __name__ == "__main__":
