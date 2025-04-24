@@ -3,7 +3,8 @@
 import os
 import json
 import re
-from flask import Flask, request, jsonify, send_from_directory, render_template
+from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
 from openai import OpenAI
 from dotenv import load_dotenv
 from database.operations import (
@@ -15,7 +16,8 @@ from database.operations import (
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "x.env"))
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='frontend/build', static_url_path='')
+CORS(app)  # Enable CORS for all routes
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 WATERMARK = "🚨 FAKE CONTENT ! DO NOT TRUST 🚨"
 
@@ -44,7 +46,7 @@ def safe_parse_json(text: str):
     return json.loads(json_str)
 
 
-@app.route("/search", methods=["GET"])
+@app.route("/api/search", methods=["GET"])
 def search():
     """Handle search queries by generating fake search results using GPT."""
     query = request.args.get("q", "").strip()
@@ -103,37 +105,41 @@ def page_api():
     # Check if page already exists
     existing_content = get_generated_page(url)
     if existing_content:
-        return render_template(
-            "page.html",
-            content=existing_content,
-            watermark=WATERMARK
-        )
+        return jsonify({
+            "content": existing_content,
+            "watermark": WATERMARK
+        })
 
     prompt = (
         f"Generate a complete HTML page for this URL: {url}\n"
         "- Use <h1> for the title\n"
         "- Wrap each paragraph in <p>\n"
-        "- Include a fixed-position watermark banner at the top right\n"
         "- Do NOT output any Markdown fences or code blocks, only raw HTML\n"
     )
 
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-4",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=1000,
     )
     page_content = response.choices[0].message.content.strip()
+    
+    # Save the generated page to database
+    save_generated_page(url, page_content)
 
-    return render_template(
-        "page.html",
-        content=page_content,
-        watermark=WATERMARK
-    )
+    return jsonify({
+        "content": page_content,
+        "watermark": WATERMARK
+    })
 
 
-@app.route("/", methods=["GET"])
-def index():
-    return render_template("index.html")
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(app.static_folder + '/' + path):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
 
 
 if __name__ == "__main__":

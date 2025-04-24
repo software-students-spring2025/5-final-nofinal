@@ -7,7 +7,7 @@ load_dotenv()
 
 # Get MongoDB connection string from environment variable
 MONGO_URI = os.getenv('MONGODB_URI', 'mongodb://localhost:27017')
-DB_NAME = os.getenv('DB_NAME', 'fake_google')
+DB_NAME = os.getenv('DB_NAME', 'giigle')
 
 # Create a MongoDB client
 client = MongoClient(MONGO_URI)

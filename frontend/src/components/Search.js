@@ -8,7 +8,7 @@ export default function Search() {
   const [showResults, setShowResults] = useState(false);
 
   const doSearch = async () => {
-    const res = await fetch(`/search?q=${encodeURIComponent(q)}`);
+    const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
     const { results, watermark } = await res.json();
     setResults(results);
     setWm(watermark);
