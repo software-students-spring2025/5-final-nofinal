@@ -7,11 +7,12 @@ from flask import Flask, request, jsonify, send_from_directory
 from openai import OpenAI
 from dotenv import load_dotenv
 
-load_dotenv(os.path.join(os.path.dirname(__file__), 'x.env'))
+load_dotenv(os.path.join(os.path.dirname(__file__), "x.env"))
 
 app = Flask(__name__)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 WATERMARK = "🚨 FAKE CONTENT ! DO NOT TRUST 🚨"
+
 
 def safe_parse_json(text: str):
     """
@@ -36,6 +37,7 @@ def safe_parse_json(text: str):
         json_str = cleaned[start : end + 1]
     return json.loads(json_str)
 
+
 @app.route("/search", methods=["GET"])
 def search():
     """Handle search queries by generating fake search results using GPT."""
@@ -45,7 +47,7 @@ def search():
 
     prompt = (
         "Generate *exactly* 5 results "
-        "and output *only* the JSON array (no extra text). \"{query}\"\n\n"
+        'and output *only* the JSON array (no extra text). "{query}"\n\n'
         "Respond with *only* a JSON array (no Markdown fences, no comments),\n"
         "where each element has keys: "
         "title (string), snippet (string), url (string). Under 500 tokens"
@@ -60,16 +62,15 @@ def search():
     try:
         results = safe_parse_json(raw)
     except ValueError:
-        results = [{
-            "title": "Parse Error",
-            "snippet": raw.strip(),
-            "url": "#"
-        }]
+        results = [{"title": "Parse Error", "snippet": raw.strip(), "url": "#"}]
 
-    return jsonify({
-        "results": results,
-        "watermark": WATERMARK,
-    })
+    return jsonify(
+        {
+            "results": results,
+            "watermark": WATERMARK,
+        }
+    )
+
 
 @app.route("/api/page", methods=["GET"])
 def page_api():
@@ -104,6 +105,7 @@ def serve_react(path):
     if path and os.path.exists(os.path.join(build_dir, path)):
         return send_from_directory(build_dir, path)
     return send_from_directory(build_dir, "index.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5441)
