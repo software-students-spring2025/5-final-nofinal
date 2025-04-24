@@ -150,3 +150,6 @@ cython_debug/
 
 # history
 .history/
+x.env
+=======
+frontend/node_modules/
