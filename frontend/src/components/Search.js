@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 export default function Search() {
   const [q, setQ] = useState('');
@@ -48,9 +49,9 @@ export default function Search() {
           <div className="results">
             {results.map((r, i) => (
               <div className="result" key={i}>
-                <a href={`/page?url=${encodeURIComponent(r.url)}`}>
+                <Link to={`/page?url=${encodeURIComponent(r.url)}`}>
                   {r.title}
-                </a>
+                </Link>
                 <div className="url">{r.url}</div>
                 <p className="snippet">{r.snippet}</p>
               </div>

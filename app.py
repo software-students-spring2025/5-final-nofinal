@@ -1,16 +1,14 @@
 import os
 import json
 import re
-from flask import Flask, request, jsonify, render_template, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory
 from openai import OpenAI
 from dotenv import load_dotenv
-
 
 load_dotenv(os.path.join(os.path.dirname(__file__), 'x.env'))
 
 app = Flask(__name__)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
 WATERMARK = "🚨 FAKE CONTENT ! DO NOT TRUST 🚨"
 
 def safe_parse_json(text: str):
@@ -20,17 +18,12 @@ def safe_parse_json(text: str):
     3. Locate either the last ']' or, if missing, the last '}', then append ']'
     4. json.loads the slice
     """
-    # 1) drop ``` fences and '#' comments
     text = re.sub(r"```(?:json)?", "", text)
     lines = [ln for ln in text.splitlines() if not ln.lstrip().startswith("#")]
     cleaned = "\n".join(lines).strip()
-
-    # 2) find the first '['
     start = cleaned.find("[")
     if start == -1:
         raise ValueError("no JSON array found")
-
-    # 3) find the last ']'—or fallback to last '}' and append ']'
     end = cleaned.rfind("]")
     if end == -1 or end < start:
         last_obj = cleaned.rfind("}")
@@ -39,8 +32,6 @@ def safe_parse_json(text: str):
         json_str = cleaned[start : last_obj + 1] + "]"
     else:
         json_str = cleaned[start : end + 1]
-
-    # 4) parse
     return json.loads(json_str)
 
 @app.route("/search", methods=["GET"])
@@ -82,22 +73,21 @@ def page_api():
         return jsonify(error="Missing `url` parameter"), 400
 
     prompt = (
-        f"Create a fully-fleshed fake web page for this URL:\n\n"
-        f"    {url}\n\n"
-        f"Include a headline, several paragraphs, maybe a sidebar or footer. "
-        f"Make it look realistic, but remember it's FAKE.\n"
+        f"Generate a complete HTML page for this URL: {url}\n"
+        "- Use <h1> for the title\n"
+        "- Wrap each paragraph in <p>\n"
+        "- Include a fixed-position watermark banner at the top right\n"
+        "- Do NOT output any Markdown fences or code blocks, only raw HTML\n"
     )
+
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=1000,
     )
-    page_content = response.choices[0].message.content.strip()
-    return jsonify({
-        "content": page_content,
-        "watermark": WATERMARK
-    })
-
+    # The model will now return pure HTML
+    page_html = response.choices[0].message.content.strip()
+    return jsonify({"html": page_html})
 
 
 @app.route("/", defaults={"path": ""})
