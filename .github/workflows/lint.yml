@@ -23,4 +23,4 @@ jobs:
 
       - name: Format with black
         run: |
-          pipenv run black --diff --check app.py
+          black --diff --check app.py
