@@ -1,20 +1,17 @@
 import os
 import json
 import re
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from openai import OpenAI
 from dotenv import load_dotenv
 
 
 load_dotenv(os.path.join(os.path.dirname(__file__), 'x.env'))
 
-
-
 app = Flask(__name__)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 WATERMARK = "🚨 FAKE CONTENT ! DO NOT TRUST 🚨"
-
 
 def safe_parse_json(text: str):
     """
@@ -46,7 +43,6 @@ def safe_parse_json(text: str):
     # 4) parse
     return json.loads(json_str)
 
-
 @app.route("/search", methods=["GET"])
 def search():
     q = request.args.get("q", "").strip()
@@ -59,7 +55,6 @@ def search():
         "Respond with *only* a JSON array (no Markdown fences, no comments),\n"
         "where each element has keys: title (string), snippet (string), url (string). Under 500 tokens"
     )
-
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "user", "content": prompt}],
@@ -68,7 +63,7 @@ def search():
     raw = response.choices[0].message.content
     try:
         results = safe_parse_json(raw)
-    except Exception as e:
+    except Exception:
         results = [{
             "title": "Parse Error",
             "snippet": raw.strip(),
@@ -80,11 +75,11 @@ def search():
         "watermark": WATERMARK,
     })
 
-@app.route("/page", methods=["GET"])
-def page():
+@app.route("/api/page", methods=["GET"])
+def page_api():
     url = request.args.get("url", "").strip()
     if not url:
-        return "Missing `url` parameter", 400
+        return jsonify(error="Missing `url` parameter"), 400
 
     prompt = (
         f"Create a fully-fleshed fake web page for this URL:\n\n"
@@ -92,25 +87,26 @@ def page():
         f"Include a headline, several paragraphs, maybe a sidebar or footer. "
         f"Make it look realistic, but remember it's FAKE.\n"
     )
-
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=1000,
     )
     page_content = response.choices[0].message.content.strip()
-
-    return render_template(
-        "page.html",
-        content=page_content,
-        watermark=WATERMARK
-    )
+    return jsonify({
+        "content": page_content,
+        "watermark": WATERMARK
+    })
 
 
-@app.route("/", methods=["GET"])
-def index():
-    return render_template("index.html")
 
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve_react(path):
+    build_dir = os.path.join(os.path.dirname(__file__), "frontend", "build")
+    if path and os.path.exists(os.path.join(build_dir, path)):
+        return send_from_directory(build_dir, path)
+    return send_from_directory(build_dir, "index.html")
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5441)
