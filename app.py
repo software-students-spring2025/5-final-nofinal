@@ -137,7 +137,7 @@ def page_api():
         max_tokens=1000,
     )
     page_content = response.choices[0].message.content.strip()
-    
+ 
     # Save the generated page to database
     save_generated_page(url, page_content)
 
