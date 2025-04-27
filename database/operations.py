@@ -1,3 +1,9 @@
+"""Database operations module for handling database interactions.
+
+This module provides functions for saving and retrieving search queries
+and generated pages from the MongoDB database.
+"""
+
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict
 from .connection import search_queries, generated_pages
@@ -15,7 +21,6 @@ def get_recent_search_results(query: str, max_age_minutes: int = 30) -> Optional
         'query': query,
         'timestamp': {'$gt': cutoff_time}
     }, sort=[('timestamp', -1)])
-    
     return result['results'] if result else None
 
 def save_generated_page(url: str, content: str) -> None:

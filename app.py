@@ -3,11 +3,11 @@
 import os
 import json
 import re
+import argparse
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from openai import OpenAI
 from dotenv import load_dotenv
-import argparse
 from database.operations import (
     save_search_query,
     get_recent_search_results,
@@ -76,25 +76,13 @@ def search():
         })
 
     # Generate new results if not in cache
-    cached_results = get_recent_search_results(query)
-    if cached_results:
-        return jsonify({
-            "results": cached_results,
-            "watermark": WATERMARK,
-        })
-
-    base = (
+    prompt = (
         f"Generate *exactly* 5 results "
         f'and output *only* the JSON array (no extra text). "{query}"\n\n'
         "Respond with *only* a JSON array (no Markdown fences, no comments),\n"
-        "where each element has keys: title (string), snippet (string), url (string). Under 500 tokens."
+        "where each element has keys: "
+        "title (string), snippet (string), url (string). Under 500 tokens"
     )
-
-    # If crazy_mode, ask for maximal deep dark fantasy
-    if crazy_mode:
-        prompt = base + " Make them as wildly imaginative and fantasy-driven as possible! BE CRAZY"
-    else:
-        prompt = base
 
     response = client.chat.completions.create(
         model="gpt-4o",
@@ -106,10 +94,10 @@ def search():
         results = safe_parse_json(raw)
         # Save to database
         save_search_query(query, results)
-    except Exception as e:
+    except ValueError as e:
         results = [{
             "title": "Parse Error",
-            "snippet": raw.strip(),
+            "snippet": str(e),
             "url": "#"
         }]
 
@@ -136,17 +124,12 @@ def page_api():
             "watermark": WATERMARK
         })
 
-    base = (
-        f"Generate a complete HTML page for the potential contents that is likely to appear in this URL: {url}\n"
+    prompt = (
+        f"Generate a complete HTML page for this URL: {url}\n"
         "- Use <h1> for the title\n"
         "- Wrap each paragraph in <p>\n"
         "- Do NOT output any Markdown fences or code blocks, only raw HTML\n"
     )
-    
-    if crazy_mode:
-        prompt = base + "\n\nAnd make the whole page as delightfully crazy and fantastical as you can!"
-    else:
-        prompt = base
 
     response = client.chat.completions.create(
         model="gpt-4",
@@ -167,10 +150,10 @@ def page_api():
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
+    """Serve the frontend static files."""
     if path != "" and os.path.exists(app.static_folder + '/' + path):
         return send_from_directory(app.static_folder, path)
-    else:
-        return send_from_directory(app.static_folder, 'index.html')
+    return send_from_directory(app.static_folder, 'index.html')
 
 
 if __name__ == "__main__":

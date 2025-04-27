@@ -1,3 +1,9 @@
+"""Database connection module for MongoDB setup and initialization.
+
+This module handles the MongoDB connection setup, database initialization,
+and provides access to the collections used throughout the application.
+"""
+
 import os
 from pymongo import MongoClient
 from dotenv import load_dotenv
