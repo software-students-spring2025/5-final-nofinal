@@ -12,7 +12,8 @@ from database.operations import (
     save_search_query,
     get_recent_search_results,
     save_generated_page,
-    get_generated_page
+    get_generated_page,
+    get_search_history
 )
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "x.env"))
@@ -145,6 +146,41 @@ def page_api():
         "content": page_content,
         "watermark": WATERMARK
     })
+
+
+@app.route("/api/search/history", methods=["GET"])
+def search_history():
+    """Get recent search history."""
+    limit = int(request.args.get("limit", 10))
+    history = get_search_history(limit)
+    return jsonify({"history": history})
+
+
+@app.route("/api/roast", methods=["GET"])
+def roast_user():
+    """Generate a roast based on user's search history."""
+    history = get_search_history(10)  # Get last 10 searches
+    if not history:
+        return jsonify({"roast": "I can't roast you if you haven't searched anything! Try searching something first."})
+    
+    # Create a prompt for the roast
+    searches = [item['query'] for item in history]
+    prompt = (
+        f"Based on these search queries: {', '.join(searches)}\n\n"
+        "Generate a funny, witty roast about the person's search history. "
+        "Be creative and humorous, but keep it PG-13. "
+        "Make it sound like a stand-up comedy bit. "
+        "Keep it under 200 words."
+    )
+
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=500,
+    )
+    
+    roast = response.choices[0].message.content.strip()
+    return jsonify({"roast": roast})
 
 
 @app.route('/', defaults={'path': ''})

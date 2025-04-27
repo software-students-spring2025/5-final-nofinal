@@ -36,3 +36,19 @@ def get_generated_page(url: str) -> Optional[str]:
     """Get a generated page by URL"""
     page = generated_pages.find_one({'url': url})
     return page['content'] if page else None
+
+def get_search_history(limit: int = 10) -> List[Dict]:
+    """Get recent search history.
+    
+    Args:
+        limit (int): Maximum number of searches to return
+        
+    Returns:
+        List[Dict]: List of recent searches with their timestamps
+    """
+    history = search_queries.find(
+        {},
+        {'query': 1, 'timestamp': 1, '_id': 0}
+    ).sort('timestamp', -1).limit(limit)
+    
+    return list(history)
