@@ -66,4 +66,35 @@
 
 .content-container a:hover {
   text-decoration: underline;
-} 
+}
+
+.loading-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 20px;
+}
+
+.spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 4px solid #ddd;
+  border-top-color: #333;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.joke {
+  margin-top: 1rem;
+  font-style: italic;
+  color: #555;
+  text-align: center;
+  max-width: 600px;
+}
+
+/* keyframes for spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
