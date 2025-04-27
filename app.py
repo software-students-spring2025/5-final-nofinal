@@ -7,6 +7,7 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from openai import OpenAI
 from dotenv import load_dotenv
+import argparse
 from database.operations import (
     save_search_query,
     get_recent_search_results,
@@ -16,10 +17,23 @@ from database.operations import (
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "x.env"))
 
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--crazy",
+    action="store_true",
+    help="Enable crazy mode: GPT will go full fantasy, and watermark changes."
+)
+args = parser.parse_args()
+crazy_mode = args.crazy
+
+
 app = Flask(__name__, static_folder='frontend/build', static_url_path='')
 CORS(app)  # Enable CORS for all routes
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-WATERMARK = "🚨 FAKE CONTENT ! DO NOT TRUST 🚨"
+if crazy_mode:
+    WATERMARK = "🚨 HAHAHAHAHAHA DIE HUMAN DIE 🚨"
+else:
+    WATERMARK = "🚨 FAKE CONTENT ! DO NOT TRUST 🚨"
 
 
 def safe_parse_json(text: str):
@@ -62,13 +76,25 @@ def search():
         })
 
     # Generate new results if not in cache
-    prompt = (
+    cached_results = get_recent_search_results(query)
+    if cached_results:
+        return jsonify({
+            "results": cached_results,
+            "watermark": WATERMARK,
+        })
+
+    base = (
         f"Generate *exactly* 5 results "
         f'and output *only* the JSON array (no extra text). "{query}"\n\n'
         "Respond with *only* a JSON array (no Markdown fences, no comments),\n"
-        "where each element has keys: "
-        "title (string), snippet (string), url (string). Under 500 tokens"
+        "where each element has keys: title (string), snippet (string), url (string). Under 500 tokens."
     )
+
+    # If crazy_mode, ask for maximal deep dark fantasy
+    if crazy_mode:
+        prompt = base + " Make them as wildly imaginative and fantasy-driven as possible! BE CRAZY"
+    else:
+        prompt = base
 
     response = client.chat.completions.create(
         model="gpt-4o",
@@ -110,12 +136,17 @@ def page_api():
             "watermark": WATERMARK
         })
 
-    prompt = (
-        f"Generate a complete HTML page for this URL: {url}\n"
+    base = (
+        f"Generate a complete HTML page for the potential contents that is likely to appear in this URL: {url}\n"
         "- Use <h1> for the title\n"
         "- Wrap each paragraph in <p>\n"
         "- Do NOT output any Markdown fences or code blocks, only raw HTML\n"
     )
+    
+    if crazy_mode:
+        prompt = base + "\n\nAnd make the whole page as delightfully crazy and fantastical as you can!"
+    else:
+        prompt = base
 
     response = client.chat.completions.create(
         model="gpt-4",

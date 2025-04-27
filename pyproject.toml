@@ -9,6 +9,7 @@ dependencies = [
     "flask",
     "python-dotenv",
     "openai",
+    "argparse",
     "pymongo>=4.6.1"
 ]
 
