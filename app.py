@@ -161,8 +161,13 @@ def roast_user():
     """Generate a roast based on user's search history."""
     history = get_search_history(10)  # Get last 10 searches
     if not history:
-        return jsonify({"roast": "I can't roast you if you haven't searched anything! Try searching something first."})
-    
+        return jsonify({
+            "roast": (
+                "I can't roast you if you haven't searched anything! "
+                "Try searching something first."
+            )
+        })
+
     # Create a prompt for the roast
     searches = [item['query'] for item in history]
     prompt = (
@@ -178,7 +183,7 @@ def roast_user():
         messages=[{"role": "user", "content": prompt}],
         max_tokens=500,
     )
-    
+
     roast = response.choices[0].message.content.strip()
     return jsonify({"roast": roast})
 
