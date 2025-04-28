@@ -13,7 +13,7 @@ from database.operations import (
     get_recent_search_results,
     save_generated_page,
     get_generated_page,
-    get_search_history
+    get_search_history,
 )
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "x.env"))
@@ -22,13 +22,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--crazy",
     action="store_true",
-    help="Enable crazy mode: GPT will go full fantasy, and watermark changes."
+    help="Enable crazy mode: GPT will go full fantasy, and watermark changes.",
 )
 args = parser.parse_args()
 crazy_mode = args.crazy
 
 
-app = Flask(__name__, static_folder='frontend/build', static_url_path='')
+app = Flask(__name__, static_folder="frontend/build", static_url_path="")
 CORS(app)  # Enable CORS for all routes
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 if crazy_mode:
@@ -71,10 +71,12 @@ def search():
     # Check cache first
     cached_results = get_recent_search_results(query)
     if cached_results:
-        return jsonify({
-            "results": cached_results,
-            "watermark": WATERMARK,
-        })
+        return jsonify(
+            {
+                "results": cached_results,
+                "watermark": WATERMARK,
+            }
+        )
 
     # Generate new results if not in cache
     prompt = (
@@ -96,11 +98,7 @@ def search():
         # Save to database
         save_search_query(query, results)
     except ValueError as e:
-        results = [{
-            "title": "Parse Error",
-            "snippet": str(e),
-            "url": "#"
-        }]
+        results = [{"title": "Parse Error", "snippet": str(e), "url": "#"}]
 
     return jsonify(
         {
@@ -120,10 +118,7 @@ def page_api():
     # Check if page already exists
     existing_content = get_generated_page(url)
     if existing_content:
-        return jsonify({
-            "content": existing_content,
-            "watermark": WATERMARK
-        })
+        return jsonify({"content": existing_content, "watermark": WATERMARK})
 
     prompt = (
         f"Generate a complete HTML page for this URL: {url}\n"
@@ -142,10 +137,7 @@ def page_api():
     # Save the generated page to database
     save_generated_page(url, page_content)
 
-    return jsonify({
-        "content": page_content,
-        "watermark": WATERMARK
-    })
+    return jsonify({"content": page_content, "watermark": WATERMARK})
 
 
 @app.route("/api/search/history", methods=["GET"])
@@ -161,15 +153,17 @@ def roast_user():
     """Generate a roast based on user's search history."""
     history = get_search_history(10)  # Get last 10 searches
     if not history:
-        return jsonify({
-            "roast": (
-                "I can't roast you if you haven't searched anything! "
-                "Try searching something first."
-            )
-        })
+        return jsonify(
+            {
+                "roast": (
+                    "I can't roast you if you haven't searched anything! "
+                    "Try searching something first."
+                )
+            }
+        )
 
     # Create a prompt for the roast
-    searches = [item['query'] for item in history]
+    searches = [item["query"] for item in history]
     prompt = (
         f"Based on these search queries: {', '.join(searches)}\n\n"
         "Generate a funny, witty roast about the person's search history. "
@@ -188,13 +182,13 @@ def roast_user():
     return jsonify({"roast": roast})
 
 
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
 def serve(path):
     """Serve the frontend static files."""
-    if path != "" and os.path.exists(app.static_folder + '/' + path):
+    if path != "" and os.path.exists(app.static_folder + "/" + path):
         return send_from_directory(app.static_folder, path)
-    return send_from_directory(app.static_folder, 'index.html')
+    return send_from_directory(app.static_folder, "index.html")
 
 
 if __name__ == "__main__":
