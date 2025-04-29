@@ -18,8 +18,9 @@ Through Giggle, we encourage users to not lose their ability to reason, question
 ## DockerHub Container Images
 | Subsystem | DockerHub Link |
 |:---|:---|
-| Backend (Flask App) | [sophiagu/backend](https://hub.docker.com/r/sophiagu/backend) |
-| Frontend (Nginx Frontend) | [sophiagu/frontend](https://hub.docker.com/r/sophiagu/frontend) |
+| Backend (Flask) | [sophiagu/backend](https://hub.docker.com/r/sophiagu/backend) |
+| Frontend | [sophiagu/frontend](https://hub.docker.com/r/sophiagu/frontend) |
+| Database (MongoDB) | [mongo](https://hub.docker.com/_/mongo) |
 
 ## Team membes: 
 [Sophia Gu](https://github.com/Sophbx), 
@@ -33,18 +34,51 @@ Through Giggle, we encourage users to not lose their ability to reason, question
 ## How to Configure and Run the Project
 
 ### Prerequisites
+- Docker installed (any version above 20.10)
+- Docker Compose installed (v2+ integrated with Docker)
+- Git installed
 
 ### Setup Instructions
 
 #### **1. Clone the repository**
+```sh
+git clone https://github.com/software-students-spring2025/5-final-nofinal.git
+cd YOUR_REPO
+```
 
 #### **2. Set up environment variables**
+```sh
+cp .env.example .env
+```
 
 #### **3. Build and start all services**
+```sh
+docker-compose pull
+docker-compose up -d
+```
+This will start:
+- Flask backend at http://localhost:5000
+- React frontend at http://localhost:3000
+- MongoDB database at localhost:27017
 
 ### Environment Variables Required
+You must create a .env file at the root. Here's what it should contain:
+```ini
+OPENAI_API_KEY=your-openai-api-key-here
+FLASK_ENV=development
+MONGO_URI=mongodb://database:27017/fake_google
+```
 
 ## Secrets and Configuration
+- .env file is not tracked by Git.
+- An example file .env.example is provided.
+- Replace dummy values with your own valid credentials.
 
 ## Starter Data Import (Optional)
-
+If needed, you can manually insert starter data into MongoDB:
+```sh
+docker exec -it YOUR_DATABASE_CONTAINER_NAME mongosh
+use fake_google
+db.search_queries.insertOne({ query: "example search", results: [] })
+db.page_summaries.insertOne({ url: "https://example.com", summary: "This is an example." })
+```
