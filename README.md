@@ -24,6 +24,9 @@ No real web crawling or indexing occurs — **everything is imagined**.
 - **Our Purpose:** This project serves as a reflection on how easy it can be to accept AI-generated content without any check.
 We aim to highlight the risks of over-dependence on AI, and the gradual erosion of self-consciousness and independent thinking when facing daily questions, big or small.
 
+we hope to demonstrate how seamlessly AI can generate plausible-looking results, even when there’s no underlying truth, and prompt users to question the source of their information and to verify before trusting.
+
+
 Through Giggle, we encourage users to not lose their ability to reason, question, and decide for themselves.
 
 ## DockerHub Container Images
