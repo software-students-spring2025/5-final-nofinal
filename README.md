@@ -65,7 +65,6 @@ This will start:
 You must create a .env file at the root. Here's what it should contain:
 ```ini
 OPENAI_API_KEY=your-openai-api-key-here
-FLASK_ENV=development
 MONGO_URI=mongodb://database:27017/fake_google
 ```
 
