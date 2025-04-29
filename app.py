@@ -24,7 +24,7 @@ parser.add_argument(
     action="store_true",
     help="Enable crazy mode: GPT will go full fantasy, and watermark changes.",
 )
-args = parser.parse_args()
+args,_ = parser.parse_known_args()
 crazy_mode = args.crazy
 
 
