@@ -1,7 +1,7 @@
 # Giggle: AI-Powered Search Reflection Engine
 
 ![Lint](https://github.com/software-students-spring2025/5-final-nofinal/actions/workflows/lint.yml/badge.svg)
-![Flask CI](https://github.com/software-students-spring2025/5-final-nofinal/actions/workflows/ci_app.yml/badge.svg)
+![Flask CI](https://github.com/software-students-spring2025/5-final-nofinal/actions/workflows/app_ci.yml/badge.svg)
 ![Database CI](https://github.com/software-students-spring2025/5-final-nofinal/actions/workflows/ci_db.yml/badge.svg)
 ![CD](https://github.com/software-students-spring2025/5-final-nofinal/actions/workflows/deploy.yml/badge.svg)
 
