@@ -1,4 +1,4 @@
-name: Flask Unit Tests
+name: Flask CI
 
 on:
   push:
