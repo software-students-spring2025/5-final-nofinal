@@ -208,7 +208,8 @@ def serve(path):
 
 
 @app.errorhandler(404)
-def handle_404(e):
+def handle_404(_error):
+    """Fallback for any unmatched route: serve stub index or React index."""
     return serve(path=""), 200
 
 
