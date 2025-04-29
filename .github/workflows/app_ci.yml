@@ -25,6 +25,6 @@ jobs:
       - name: Set environment variables
         run: echo "OPENAI_API_KEY=fake-key-for-testing" >> $GITHUB_ENV
 
-      - name: Run app unit tests
+      - name: Run app & frontend tests
         run: |
-          pytest --cov=app tests/test_app.py --cov-config=.coveragerc
+          pytest --cov=app tests/test_app.py tests/test_frontend.py --cov-config=.coveragerc
