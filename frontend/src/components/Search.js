@@ -135,7 +135,7 @@ export default function Search() {
             </button>
             <button
               onClick={getRoast}
-              className="roast-button"
+              className="search-button roast-button"
               title="Get roasted based on your search history!"
             >
               Roast Me
