@@ -4,7 +4,7 @@ import os
 import json
 import re
 import argparse
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, Response
 from flask_cors import CORS
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -24,7 +24,7 @@ parser.add_argument(
     action="store_true",
     help="Enable crazy mode: GPT will go full fantasy, and watermark changes.",
 )
-args,_ = parser.parse_known_args()
+args, _ = parser.parse_known_args()
 crazy_mode = args.crazy
 
 
@@ -185,10 +185,32 @@ def roast_user():
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve(path):
-    """Serve the frontend static files."""
-    if path != "" and os.path.exists(app.static_folder + "/" + path):
-        return send_from_directory(app.static_folder, path)
-    return send_from_directory(app.static_folder, "index.html")
+    """Serve the frontend static files or fallback to stub HTML if not built."""
+    build_dir = app.static_folder
+    index_file = os.path.join(build_dir, "index.html")
+
+    if os.path.exists(index_file):
+        if path != "" and os.path.exists(build_dir + "/" + path):
+            return send_from_directory(build_dir, path)
+        return send_from_directory(build_dir, "index.html")
+
+    stub = """<!DOCTYPE html>
+        <html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <title>Giigle</title>
+        </head>
+        <body>
+        <div id="root"></div>
+        </body>
+        </html>"""
+    return Response(stub, mimetype="text/html")
+
+
+@app.errorhandler(404)
+def handle_404(_error):
+    """Fallback for any unmatched route: serve stub index or React index."""
+    return serve(path=""), 200
 
 
 if __name__ == "__main__":
