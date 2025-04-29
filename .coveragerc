@@ -3,5 +3,5 @@ branch = True
 source = database
 
 [report]
-show_missing = True
-skip_covered = True
+show_missing = False
+skip_covered = False
