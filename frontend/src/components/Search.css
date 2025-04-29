@@ -226,6 +226,14 @@
   letter-spacing: -1px;
 }
 
+.search-button.roast-button {
+  background: #ea4335;
+}
+
+.search-button.roast-button:hover {
+  background: #d33426;
+}
+
 .red { color: #ea4335; }
 .yellow { color: #fbbc05; }
 .blue { color: #4285f4; }
