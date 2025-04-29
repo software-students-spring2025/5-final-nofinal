@@ -89,3 +89,33 @@ def test_page_new(client, monkeypatch):
     data = res.get_json()
     assert data["content"] == '<h1>Title</h1><p>Paragraph</p>'
     assert data["watermark"] == WATERMARK
+
+def test_search_history(client, monkeypatch):
+    sample_history = [{"query": "test"}]
+
+    monkeypatch.setattr(giigle_app, 'get_search_history', lambda limit: sample_history)
+
+    res = client.get('/api/search/history')
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data["history"] == sample_history
+
+def test_roast_user_with_history(client, monkeypatch):
+    sample_history = [{"query": "cats"}, {"query": "dogs"}]
+    dummy_roast_response = "<funny roast>"
+
+    monkeypatch.setattr(giigle_app, 'get_search_history', lambda limit: sample_history)
+    monkeypatch.setattr(giigle_app.client.chat.completions, 'create', lambda **kwargs: type('obj', (), {'choices': [type('msg', (), {'message': type('msg', (), {'content': dummy_roast_response})})]})())
+
+    res = client.get('/api/roast')
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data["roast"] == dummy_roast_response
+
+def test_roast_user_no_history(client, monkeypatch):
+    monkeypatch.setattr(giigle_app, 'get_search_history', lambda limit: [])
+
+    res = client.get('/api/roast')
+    assert res.status_code == 200
+    data = res.get_json()
+    assert "can't roast" in data["roast"].lower()
