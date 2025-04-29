@@ -40,5 +40,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /srv/5-final-nofinal
-            docker-compose pull
-            docker-compose up -d
+            docker compose pull
+            docker compose up -d
