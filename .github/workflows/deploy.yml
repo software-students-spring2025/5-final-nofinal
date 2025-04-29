@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -22,17 +25,22 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and Push Backend Image
+      - name: Build Backend Image
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/backend:latest .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/backend:latest
 
-      - name: Build and Push Frontend Image
+      - name: Build Frontend Image
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest ./frontend
+
+      - name: Push Docker Images (only on push to main)
+        if: github.event_name == 'push'
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/backend:latest
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest
 
-      - name: SSH into DigitalOcean and Deploy
+      - name: SSH into DigitalOcean and Deploy (only on push to main)
+        if: github.event_name == 'push'
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.DO_SERVER_IP }}
