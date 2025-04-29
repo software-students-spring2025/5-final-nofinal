@@ -8,7 +8,7 @@ COPY . .
 
 # Install dependencies
 RUN pip install --no-cache-dir --upgrade pip
-RUN pip install flask pymongo openai python-dotenv
+RUN pip install flask flask_cors pymongo openai python-dotenv
 
 EXPOSE 5000
 

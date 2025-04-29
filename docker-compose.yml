@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  backend:
+    image: sophiagu/backend:latest
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://database:27017/fake_google
+    depends_on:
+      - database
+
+  frontend:
+    image: sophiagu/frontend:latest
+    ports:
+      - "3000:3000"
+
+  database:
+    image: mongo:5.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
