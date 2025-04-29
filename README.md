@@ -8,7 +8,11 @@
 
 ## Introduction
 Today’s generative AI systems are more like elaborate patchworks powered by big data than thinking machines with human-like intelligence. They stitch together layers of statistical tricks and handcrafted fixes to respond to our prompts, and they don’t really understand or check the correctness of the content that they produce. As a result, they can confidently “hallucinate” details that sound plausible but aren’t grounded in reality, but this seems to be enough to fool humans. 
+
+
 With today’s technological advancements in the field of AI, it’s increasingly difficult to tell whether a paragraph or image is produced by a generative model. We all know that many people say AI is the ‘next generation of search engine”, so how about we just make it looks like one. That’s why we built **Giggle**: a fully AI-powered fake “search engine” that looks and behaves like the real thing—but every result and page is completely invented.
+
+
 By creating a fake “search engine” that looks and feels real but serves up entirely imagined content, we hope to:  1. Demonstrate how seamlessly AI can generate plausible-looking results, even when there’s no underlying truth, and 2. Prompt users to question the source of their information and to verify before trusting.
 
 
