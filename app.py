@@ -16,7 +16,7 @@ from database.operations import (
     get_search_history,
 )
 
-load_dotenv(os.path.join(os.path.dirname(__file__), "x.env"))
+load_dotenv()
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
