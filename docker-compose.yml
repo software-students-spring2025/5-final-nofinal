@@ -12,9 +12,12 @@ services:
       - database
 
   frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
     image: sophiagu/frontend:latest
     ports:
-      - "3000:3000"
+      - "3000:80"
 
   database:
     image: mongo:5.0
