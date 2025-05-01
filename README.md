@@ -1,4 +1,4 @@
-# Giggle: AI-Powered Search Reflection Engine
+# Giigle: AI-Powered Search Reflection Engine
 
 ![Lint](https://github.com/software-students-spring2025/5-final-nofinal/actions/workflows/lint.yml/badge.svg)
 ![Flask CI](https://github.com/software-students-spring2025/5-final-nofinal/actions/workflows/app_ci.yml/badge.svg)
@@ -10,11 +10,11 @@
 Today’s generative AI systems are more like elaborate patchworks powered by big data than thinking machines with human-like intelligence. They stitch together layers of statistical tricks and handcrafted fixes to respond to our prompts, and they don’t really understand or check the correctness of the content that they produce. As a result, they can confidently “hallucinate” details that sound plausible but aren’t grounded in reality, but this seems to be enough to fool humans. 
 
 
-With today’s technological advancements in the field of AI, it’s increasingly difficult to tell whether a paragraph or image is produced by a generative model. We all know that many people say AI is the ‘next generation of search engine”, so how about we just make it looks like one. That’s why we built **Giggle**: a fully AI-powered fake “search engine” that looks and behaves like the real thing—but every result and page is completely invented.
+With today’s technological advancements in the field of AI, it’s increasingly difficult to tell whether a paragraph or image is produced by a generative model. We all know that many people say AI is the ‘next generation of search engine”, so how about we just make it looks like one. That’s why we built **Giigle**: a fully AI-powered fake “search engine” that looks and behaves like the real thing—but every result and page is completely invented.
 
 
 ## Project Overview
-**Giggle** is a playful yet thought-provoking replica of the familiar Google search experience —
+**Giigle** is a playful yet thought-provoking replica of the familiar Google search experience —
 but with a twist:
 **All search results and page summaries are generated entirely by AI** (via GPT models and crafted prompts).
 No real web crawling or indexing occurs — **everything is imagined**.
@@ -24,7 +24,7 @@ We aim to highlight the risks of over-dependence on AI, and the gradual erosion 
 We hope to demonstrate how seamlessly AI can generate plausible-looking results, even when there’s no underlying truth, and prompt users to question the source of their information and to verify before trusting.
 
 
-Through Giggle, we encourage users to not lose their ability to reason, question, and decide for themselves.
+Through Giigle, we encourage users to not lose their ability to reason, question, and decide for themselves.
 
 ## DockerHub Container Images
 | Subsystem | DockerHub Link |
