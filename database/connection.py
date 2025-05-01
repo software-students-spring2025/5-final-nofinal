@@ -12,12 +12,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Get MongoDB connection string from environment variable
-MONGO_URI = os.getenv('MONGODB_URI', 'mongodb://localhost:27017')
-DB_NAME = os.getenv('DB_NAME', 'giigle')
+MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/fake_google')
 
 # Create a MongoDB client
 client = MongoClient(MONGO_URI)
-db = client[DB_NAME]
+# Get database name from URI or use default
+db_name = MONGO_URI.split('/')[-1] if '/' in MONGO_URI else 'fake_google'
+db = client[db_name]
 
 # Collections
 search_queries = db.search_queries

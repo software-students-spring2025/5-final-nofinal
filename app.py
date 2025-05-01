@@ -16,7 +16,7 @@ from database.operations import (
     get_search_history,
 )
 
-load_dotenv(os.path.join(os.path.dirname(__file__), "x.env"))
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -88,7 +88,7 @@ def search():
     )
 
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-4",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=500,
     )
@@ -173,7 +173,7 @@ def roast_user():
     )
 
     response = client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-4o",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=500,
     )
@@ -214,4 +214,4 @@ def handle_404(_error):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5441)
