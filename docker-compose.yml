@@ -15,8 +15,7 @@ services:
       - app-network
 
   frontend:
-    build:
-      context: ./frontend
+    image: sophiagu/frontend:latest
     container_name: frontend
     ports:
       - "3000:80"
