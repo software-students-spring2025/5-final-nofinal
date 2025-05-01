@@ -76,7 +76,8 @@ This will start:
 You must create a .env file at the root. Here's what it should contain:
 ```ini
 OPENAI_API_KEY=your-openai-api-key-here
-MONGO_URI=mongodb://database:27017/fake_google
+MONGODB_URI=mongodb://database:27017
+DB_NAME=fake_google
 ```
 
 ## Secrets and Configuration
